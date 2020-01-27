@@ -174,8 +174,18 @@ const getAssetFromKV = async (event: FetchEvent, options?: Partial<Options>): Pr
     }
   }
   response.headers.set('Content-Type', mimeType)
+  if (pathKey) {
+    response.headers.set("ETag", `W/"${pathKey.split(".")[1]}"`);
+  }
   if (shouldSetBrowserCache) {
-    response.headers.set('Cache-Control', `max-age=${options.cacheControl.browserTTL}`)
+    response.headers.set(
+      "Cache-Control",
+      `${options.cacheControl.public ? "public, " : ""}max-age=${
+          options.cacheControl.browserTTL
+      }${options.cacheControl.mustRevalidate ? ", must-revalidate" : ""}${
+          options.cacheControl.immutable ? ", immutable" : ""
+      }`
+  );
   } else {
     response.headers.delete('Cache-Control')
   }
